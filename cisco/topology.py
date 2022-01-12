@@ -3,6 +3,7 @@ import ipaddress
 import json
 from ciscoconfparse import CiscoConfParse
 
+
 class Topology:
     def __init__(self, routers):
         self.interfaces_connections = None
@@ -14,7 +15,7 @@ class Topology:
             data[router1] = []
             dump_obj1 = cisco.dump.Dump(router1, 0, 0)
             parser_1 = CiscoConfParse(dump_obj1.get_config_filename(), syntax="ios", factory=True)
-            intf_1 = parser_1.find_objects("interface Gigabit")
+            intf_1 = parser_1.find_objects("interface")
 
             for router2 in self.routers:
                 if router1 == router2:
@@ -22,7 +23,7 @@ class Topology:
                 else:
                     dump_obj2 = cisco.dump.Dump(router2, 0, 0)
                     parser_2 = CiscoConfParse(dump_obj2.get_config_filename(), syntax="ios", factory=True)
-                    intf_2 = parser_2.find_objects("interface Gigabit")
+                    intf_2 = parser_2.find_objects("interface")
 
                     for interface_1 in intf_1:
                         if interface_1.ipv4_addr != "":
@@ -34,6 +35,10 @@ class Topology:
                                         src = interface_1.port_type + interface_1.interface_number
                                         dst = { "target_router":router2, "target_interface": interface_2.port_type + interface_2.interface_number}
                                         data[router1].append({src:dst})
+                        #else:
+                        #    src = interface_1.port_type + interface_1.interface_number
+                        #    info = { 'ipv4' : ""}
+                        #    data[router1].append({src: info})
 
         self.interfaces_connections = data
         return data

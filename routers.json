@@ -1,0 +1,42 @@
+[
+  {
+    "name": "CE1",
+    "host": "localhost",
+    "port": "5018"
+  },
+  {
+    "name": "CE2",
+    "host": "localhost",
+    "port": "5019"
+  },
+  {
+    "name": "PE1",
+    "host": "localhost",
+    "port": "5016"
+  },
+  {
+    "name": "PE2",
+    "host": "localhost",
+    "port": "5017"
+  },
+  {
+    "name": "R1",
+    "host": "localhost",
+    "port": "5006"
+  },
+  {
+    "name": "R2",
+    "host": "localhost",
+    "port": "5007"
+  },
+  {
+    "name": "R3",
+    "host": "localhost",
+    "port": "5008"
+  },
+  {
+    "name": "R4",
+    "host": "localhost",
+    "port": "5009"
+  }
+]

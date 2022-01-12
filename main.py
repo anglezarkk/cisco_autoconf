@@ -1,21 +1,20 @@
 import cisco.dump
 import cisco.topology
+import json
 import ipaddress
 from ciscoconfparse import CiscoConfParse
 
-NAME = "R1"
-HOST = "10.0.0.1"
-PASSWORD = "cisco"
+with open("routers.json", "r") as fp:
+    routers = json.load(fp)
 
-#dump=cisco.dump.Dump(NAME, HOST, PASSWORD, 0)
+rout = []
 
-dumpR1 = cisco.dump.Dump("R1", "10.0.0.1", PASSWORD, 0)
-dumpR2 = cisco.dump.Dump("R2", "10.0.0.2", PASSWORD, 0)
-#dumpR1.write_running_config()
-#dumpR2.write_running_config()
-#dump.write_running_config()
+for router in routers:
+    rout.append(router["name"])
+    #dumper = cisco.dump.Dump(router["name"], router["host"], router["port"])
+    #dumper.write_running_config()
 
-t = cisco.topology.Topology(["R1", "R2"])
+t = cisco.topology.Topology(rout)
 interfaces = t.find_interfaces_connections()
 
 print(interfaces)
