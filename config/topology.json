@@ -14,6 +14,18 @@
             "vrfs": {}
         },
         "interfaces": {
+            "Loopback0": {
+                "ipv4": "8.8.8.8/32",
+                "shutdown": false
+            },
+            "FastEthernet0/0": {
+                "ipv4": "172.16.0.2/16",
+                "shutdown": false
+            },
+            "FastEthernet0/1": {
+                "ipv4": "192.168.1.1/24",
+                "shutdown": false
+            },
             "Ethernet1/0": {
                 "shutdown": true
             },
@@ -25,12 +37,6 @@
             },
             "Ethernet1/3": {
                 "shutdown": true
-            },
-            "FastEthernet0/0": {
-                "target_router": "PE1",
-                "target_interface": "Ethernet1/0",
-                "ipv4": "172.16.0.2/16",
-                "shutdown": false
             }
         }
     },
@@ -49,6 +55,18 @@
             "vrfs": {}
         },
         "interfaces": {
+            "Loopback0": {
+                "ipv4": "9.9.9.9/32",
+                "shutdown": false
+            },
+            "FastEthernet0/0": {
+                "ipv4": "172.17.0.2/16",
+                "shutdown": false
+            },
+            "FastEthernet0/1": {
+                "ipv4": "192.168.2.1/24",
+                "shutdown": false
+            },
             "Ethernet1/0": {
                 "shutdown": true
             },
@@ -60,12 +78,6 @@
             },
             "Ethernet1/3": {
                 "shutdown": true
-            },
-            "FastEthernet0/0": {
-                "target_router": "PE2",
-                "target_interface": "Ethernet1/0",
-                "ipv4": "172.17.0.2/16",
-                "shutdown": false
             }
         }
     },
@@ -95,9 +107,19 @@
             "vrfs": {}
         },
         "interfaces": {
+            "Loopback0": {
+                "ipv4": "6.6.6.6/32",
+                "shutdown": false
+            },
+            "FastEthernet0/0": {
+                "ipv4": "20.0.0.1/8",
+                "shutdown": false
+            },
+            "FastEthernet0/1": {
+                "ipv4": "21.0.0.1/8",
+                "shutdown": false
+            },
             "Ethernet1/0": {
-                "target_router": "CE1",
-                "target_interface": "FastEthernet0/0",
                 "ipv4": "172.16.0.1/16",
                 "shutdown": false
             },
@@ -109,18 +131,6 @@
             },
             "Ethernet1/3": {
                 "shutdown": true
-            },
-            "FastEthernet0/0": {
-                "target_router": "R1",
-                "target_interface": "FastEthernet0/0",
-                "ipv4": "20.0.0.1/8",
-                "shutdown": false
-            },
-            "FastEthernet0/1": {
-                "target_router": "R3",
-                "target_interface": "FastEthernet0/1",
-                "ipv4": "21.0.0.1/8",
-                "shutdown": false
             }
         }
     },
@@ -150,24 +160,11 @@
             "vrfs": {}
         },
         "interfaces": {
-            "Ethernet1/1": {
-                "shutdown": true
-            },
-            "Ethernet1/2": {
-                "shutdown": true
-            },
-            "Ethernet1/3": {
-                "shutdown": true
-            },
-            "Ethernet1/0": {
-                "target_router": "CE2",
-                "target_interface": "FastEthernet0/0",
-                "ipv4": "172.17.0.1/16",
+            "Loopback0": {
+                "ipv4": "7.7.7.7/32",
                 "shutdown": false
             },
             "FastEthernet0/0": {
-                "target_router": "R2",
-                "target_interface": "FastEthernet0/0",
                 "ipv4": "23.0.0.1/8",
                 "shutdown": false
             },
@@ -176,6 +173,19 @@
                 "target_interface": "FastEthernet0/1",
                 "ipv4": "22.0.0.1/8",
                 "shutdown": false
+            },
+            "Ethernet1/0": {
+                "ipv4": "172.17.0.1/16",
+                "shutdown": false
+            },
+            "Ethernet1/1": {
+                "shutdown": true
+            },
+            "Ethernet1/2": {
+                "shutdown": true
+            },
+            "Ethernet1/3": {
+                "shutdown": true
             }
         }
     },
@@ -200,8 +210,20 @@
             "vrfs": {}
         },
         "interfaces": {
+            "Loopback0": {
+                "ipv4": "1.1.1.1/32",
+                "shutdown": false
+            },
+            "FastEthernet0/0": {
+                "ipv4": "20.0.0.2/8",
+                "shutdown": false
+            },
             "FastEthernet0/1": {
                 "shutdown": true
+            },
+            "Ethernet1/0": {
+                "ipv4": "10.0.0.1/8",
+                "shutdown": false
             },
             "Ethernet1/1": {
                 "shutdown": true
@@ -209,21 +231,7 @@
             "Ethernet1/2": {
                 "shutdown": true
             },
-            "FastEthernet0/0": {
-                "target_router": "PE1",
-                "target_interface": "FastEthernet0/0",
-                "ipv4": "20.0.0.2/8",
-                "shutdown": false
-            },
-            "Ethernet1/0": {
-                "target_router": "R2",
-                "target_interface": "Ethernet1/0",
-                "ipv4": "10.0.0.1/8",
-                "shutdown": false
-            },
             "Ethernet1/3": {
-                "target_router": "R3",
-                "target_interface": "Ethernet1/3",
                 "ipv4": "11.0.0.1/8",
                 "shutdown": false
             }
@@ -250,24 +258,18 @@
             "vrfs": {}
         },
         "interfaces": {
-            "FastEthernet0/1": {
-                "shutdown": true
-            },
-            "Ethernet1/2": {
-                "shutdown": true
-            },
-            "Ethernet1/3": {
-                "shutdown": true
+            "Loopback0": {
+                "ipv4": "2.2.2.2/32",
+                "shutdown": false
             },
             "FastEthernet0/0": {
-                "target_router": "PE2",
-                "target_interface": "FastEthernet0/0",
                 "ipv4": "23.0.0.2/8",
                 "shutdown": false
             },
+            "FastEthernet0/1": {
+                "shutdown": true
+            },
             "Ethernet1/0": {
-                "target_router": "R1",
-                "target_interface": "Ethernet1/0",
                 "ipv4": "10.0.0.2/8",
                 "shutdown": false
             },
@@ -276,6 +278,12 @@
                 "target_interface": "Ethernet1/1",
                 "ipv4": "13.0.0.2/8",
                 "shutdown": false
+            },
+            "Ethernet1/2": {
+                "shutdown": true
+            },
+            "Ethernet1/3": {
+                "shutdown": true
             }
         }
     },
@@ -300,8 +308,16 @@
             "vrfs": {}
         },
         "interfaces": {
+            "Loopback0": {
+                "ipv4": "3.3.3.3/32",
+                "shutdown": false
+            },
             "FastEthernet0/0": {
                 "shutdown": true
+            },
+            "FastEthernet0/1": {
+                "ipv4": "21.0.0.2/8",
+                "shutdown": false
             },
             "Ethernet1/0": {
                 "shutdown": true
@@ -309,22 +325,14 @@
             "Ethernet1/1": {
                 "shutdown": true
             },
-            "FastEthernet0/1": {
-                "target_router": "PE1",
-                "target_interface": "FastEthernet0/1",
-                "ipv4": "21.0.0.2/8",
-                "shutdown": false
-            },
-            "Ethernet1/3": {
-                "target_router": "R1",
-                "target_interface": "Ethernet1/3",
-                "ipv4": "11.0.0.2/8",
-                "shutdown": false
-            },
             "Ethernet1/2": {
                 "target_router": "R4",
                 "target_interface": "Ethernet1/2",
                 "ipv4": "12.0.0.1/8",
+                "shutdown": false
+            },
+            "Ethernet1/3": {
+                "ipv4": "11.0.0.2/8",
                 "shutdown": false
             }
         }
@@ -350,24 +358,21 @@
             "vrfs": {}
         },
         "interfaces": {
+            "Loopback0": {
+                "ipv4": "4.4.4.4/32",
+                "shutdown": false
+            },
             "FastEthernet0/0": {
                 "shutdown": true
+            },
+            "FastEthernet0/1": {
+                "ipv4": "22.0.0.2/8",
+                "shutdown": false
             },
             "Ethernet1/0": {
                 "shutdown": true
             },
-            "Ethernet1/3": {
-                "shutdown": true
-            },
-            "FastEthernet0/1": {
-                "target_router": "PE2",
-                "target_interface": "FastEthernet0/1",
-                "ipv4": "22.0.0.2/8",
-                "shutdown": false
-            },
             "Ethernet1/1": {
-                "target_router": "R2",
-                "target_interface": "Ethernet1/1",
                 "ipv4": "13.0.0.1/8",
                 "shutdown": false
             },
@@ -376,6 +381,9 @@
                 "target_interface": "Ethernet1/2",
                 "ipv4": "12.0.0.2/8",
                 "shutdown": false
+            },
+            "Ethernet1/3": {
+                "shutdown": true
             }
         }
     }

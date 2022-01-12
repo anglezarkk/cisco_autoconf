@@ -31,6 +31,8 @@ class Topology:
                     intf_2 = parser_2.find_objects("interface")
 
                     for interface_1 in intf_1:
+                        src = interface_1.port_type + interface_1.interface_number
+                        dst = None
                         if interface_1.ipv4_addr != "":
                             net_1 = ipaddress.ip_network(interface_1.ipv4_addr + '/' + str(interface_1.ipv4_masklength),
                                                          False)
@@ -39,13 +41,18 @@ class Topology:
                                     net_2 = ipaddress.ip_network(
                                         interface_2.ipv4_addr + '/' + str(interface_2.ipv4_masklength), False)
                                     if net_1 == net_2:
-                                        src = interface_1.port_type + interface_1.interface_number
                                         dst = {"target_router": router2,
                                                "target_interface": interface_2.port_type + interface_2.interface_number,
                                                "ipv4": interface_1.ipv4_addr + "/" + str(interface_1.ipv4_masklength),
                                                "shutdown": interface_1.is_shutdown,
                                                }
                                         data[router1].update({src: dst})
+                            # handle interfaces with ip, not connected to other routers
+                            if dst is None:
+                                intf_info = {"ipv4": interface_1.ipv4_addr + "/" + str(interface_1.ipv4_masklength),
+                                             "shutdown": interface_1.is_shutdown}
+                                data[router1].update({src: intf_info})
+
                         else:
                             src = interface_1.port_type + interface_1.interface_number
                             info = {"shutdown": interface_1.is_shutdown}
