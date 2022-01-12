@@ -35,8 +35,8 @@ class Topology:
                                         dst = { "target_router":router2, "target_interface": interface_2.port_type + interface_2.interface_number}
                                         data[router1].append({src:dst})
 
-            self.interfaces_connections = data
-            return data
+        self.interfaces_connections = data
+        return data
 
     def output_topology(self):
         with open("topology.json", "w", encoding="utf-8") as fp:
