@@ -1,21 +1,16 @@
-import cisco.dump
+import cisco.config
 import cisco.topology
-import json
-import ipaddress
-from ciscoconfparse import CiscoConfParse
+import cisco.parser
 
-with open("routers.json", "r") as fp:
-    routers = json.load(fp)
 
-rout = []
+if __name__ == '__main__':
+    # Dump config from GNS3
+    routers = cisco.config.get_routers_from_config()
+    #cisco.config.dump(routers)
 
-for router in routers:
-    rout.append(router["name"])
-    #dumper = cisco.dump.Dump(router["name"], router["host"], router["port"])
-    #dumper.write_running_config()
+    # Topology analysis
+    topology = cisco.topology.Topology(routers)
+    topology.output_topology()
 
-t = cisco.topology.Topology(rout)
-interfaces = t.find_interfaces_connections()
 
-print(interfaces)
-t.output_topology()
+

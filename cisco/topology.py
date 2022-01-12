@@ -1,23 +1,28 @@
 import cisco.dump
+import cisco.parser
 import ipaddress
 import json
 from ciscoconfparse import CiscoConfParse
 
 
+# Topology class
+# An bunch of functions to understand the topology of selected routers
 class Topology:
     def __init__(self, routers):
-        self.interfaces_connections = None
         self.routers = routers
 
+    # get relationships between interfaces of selected routers + addresses
     def find_interfaces_connections(self):
         data = {}
-        for router1 in self.routers:
-            data[router1] = []
+        for router1_obj in self.routers:
+            router1 = router1_obj["name"]
+            data[router1] = {}
             dump_obj1 = cisco.dump.Dump(router1, 0, 0)
             parser_1 = CiscoConfParse(dump_obj1.get_config_filename(), syntax="ios", factory=True)
             intf_1 = parser_1.find_objects("interface")
 
-            for router2 in self.routers:
+            for router2_obj in self.routers:
+                router2 = router2_obj["name"]
                 if router1 == router2:
                     print("[debug] same router, skip")
                 else:
@@ -27,22 +32,56 @@ class Topology:
 
                     for interface_1 in intf_1:
                         if interface_1.ipv4_addr != "":
-                            net_1 = ipaddress.ip_network(interface_1.ipv4_addr + '/' + str(interface_1.ipv4_masklength), False)
+                            net_1 = ipaddress.ip_network(interface_1.ipv4_addr + '/' + str(interface_1.ipv4_masklength),
+                                                         False)
                             for interface_2 in intf_2:
                                 if interface_2.ipv4_addr != "":
-                                    net_2 = ipaddress.ip_network(interface_2.ipv4_addr + '/' + str(interface_2.ipv4_masklength), False)
+                                    net_2 = ipaddress.ip_network(
+                                        interface_2.ipv4_addr + '/' + str(interface_2.ipv4_masklength), False)
                                     if net_1 == net_2:
                                         src = interface_1.port_type + interface_1.interface_number
-                                        dst = { "target_router":router2, "target_interface": interface_2.port_type + interface_2.interface_number}
-                                        data[router1].append({src:dst})
-                        #else:
-                        #    src = interface_1.port_type + interface_1.interface_number
-                        #    info = { 'ipv4' : ""}
-                        #    data[router1].append({src: info})
+                                        dst = {"target_router": router2,
+                                               "target_interface": interface_2.port_type + interface_2.interface_number,
+                                               "ipv4": interface_1.ipv4_addr + "/" + str(interface_1.ipv4_masklength),
+                                               "shutdown": interface_1.is_shutdown,
+                                               }
+                                        data[router1].update({src: dst})
+                        else:
+                            src = interface_1.port_type + interface_1.interface_number
+                            info = {"shutdown": interface_1.is_shutdown}
+                            data[router1].update({src: info})
 
-        self.interfaces_connections = data
         return data
 
+    # Get BGP information for selected routers
+    def bgp_analysis(self):
+        data = {}
+        for router_obj in self.routers:
+            router = router_obj['name']
+            routerdump = cisco.dump.Dump(router, 0, 0)
+            parser = CiscoConfParse(routerdump.get_config_filename(), syntax="ios", factory=True)
+            objects = parser.find_objects("router bgp")
+            if objects:
+                for current_object in objects:
+                    data[router] = {}
+                    bgp_json = cisco.parser.bgp(current_object.ioscfg)
+                    data[router].update({'bgp': bgp_json[0]['bgp']})
+
+        return data
+
+    # merge all infos into one file, JSON format
     def output_topology(self):
-        with open("topology.json", "w", encoding="utf-8") as fp:
-            json.dump(self.interfaces_connections, fp, ensure_ascii=False, indent=4)
+        interfaces_connections = self.find_interfaces_connections()
+        bgp_informations = self.bgp_analysis()
+
+        data = {}
+        for router_obj in self.routers:
+            router = router_obj["name"]
+            data[router] = {}
+            if router in bgp_informations:
+                data[router].update(bgp_informations[router])
+            if router in interfaces_connections:
+                data[router]['interfaces'] = interfaces_connections.get(router)
+
+        with open("./config/topology.json", "w", encoding="utf-8") as fp:
+            json.dump(data, fp, ensure_ascii=False, indent=4)
