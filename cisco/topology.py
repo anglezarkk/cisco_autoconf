@@ -47,16 +47,12 @@ class Topology:
                                                "shutdown": interface_1.is_shutdown,
                                                }
                                         data[router1].update({src: dst})
+
                             # handle interfaces with ip, not connected to other routers
-                            if dst is None:
+                            if not (interface_1.port_type + interface_1.interface_number) in data[router1].keys():
                                 intf_info = {"ipv4": interface_1.ipv4_addr + "/" + str(interface_1.ipv4_masklength),
                                              "shutdown": interface_1.is_shutdown}
                                 data[router1].update({src: intf_info})
-
-                        else:
-                            src = interface_1.port_type + interface_1.interface_number
-                            info = {"shutdown": interface_1.is_shutdown}
-                            data[router1].update({src: info})
 
         return data
 
