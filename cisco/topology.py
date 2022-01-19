@@ -72,17 +72,34 @@ class Topology:
 
         return data
 
+    def ospf_analysis(self):
+        data = {}
+        for router_obj in self.routers:
+            router = router_obj['name']
+            routerdump = cisco.dump.Dump(router, 0, 0)
+            parser = CiscoConfParse(routerdump.get_config_filename(), syntax="ios", factory=True)
+            objects = parser.find_objects("router ospf")
+            if objects:
+                for current_object in objects:
+                    data[router] = {}
+                    ospf_json = cisco.parser.ospf(current_object.ioscfg)
+                    data[router].update({'ospf': ospf_json[0]['ospf']})
+
+        return data
+
     # merge all infos into one file, JSON format
     def output_topology(self):
         interfaces_connections = self.find_interfaces_connections()
         bgp_informations = self.bgp_analysis()
-
+        ospf_informations = self.ospf_analysis()
         data = {}
         for router_obj in self.routers:
             router = router_obj["name"]
             data[router] = {}
             if router in bgp_informations:
                 data[router].update(bgp_informations[router])
+            if router in ospf_informations:
+                data[router].update(ospf_informations[router])
             if router in interfaces_connections:
                 data[router]['interfaces'] = interfaces_connections.get(router)
 

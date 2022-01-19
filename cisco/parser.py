@@ -13,3 +13,15 @@ def bgp(config):
     data = parser.result(format="json")
 
     return json.loads(data[0])
+
+
+# OSPF Cisco parser
+def ospf(config):
+    config = "\n".join(config)
+
+    parser = ttp.ttp(data=config, template="cisco/templates/ios_ospf.txt")
+    parser.parse()
+
+    data = parser.result(format="json")
+
+    return json.loads(data[0])
