@@ -43,7 +43,7 @@ class Dump:
     # write config to file
     def write_running_config(self):
         config = self.get_running_config()
-        fp = open(self.name + ".config", "w")
+        fp = open(self.get_config_filename(), "w")
         fp.write(config)
         fp.close()
 
