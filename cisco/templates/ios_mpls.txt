@@ -1,5 +1,5 @@
 <doc>
-Template to parse Cisco IOS OSPF configuration.
+Template to parse Cisco IOS MPLS configuration.
 
 Requirements: `TTP >= 0.7.x`
 
@@ -12,7 +12,7 @@ router ospf 100
  mpls ldp autoconfig
 !
 ```
-	
+
 After parsing above output, TTP should produce these results:
 ```
 ["ospf": {
@@ -42,21 +42,7 @@ ospf_defaults = {
 }
 </vars>
 
-<group name="ospf" default="ospf_default">
-router ospf {{ process_id }}
-
- <group name="config**" method="table">
-     <group name="redistribute**" method="table">
-        <group name="bgp**.asn**.{{ asn }}" method="table">
- redistribute bgp {{ asn | let("subnets", True) }} subnets
-        </group>
-     </group>
- </group>
-     <group name="mpls" method="table">
- mpls ldp {{ ldp }}
-     </group>
-
- <group name="networks**.{{ network }}**" method="table">
- network {{ network }} {{ mask }} area {{ area }}
- </group>
+<group name="mpls" default="mpls_defaults">
+mpls label protocol {{ label_protocol }}
+mpls ldp router-id {{ router-id }} force
 </group>

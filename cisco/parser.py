@@ -25,3 +25,15 @@ def ospf(config):
     data = parser.result(format="json")
 
     return json.loads(data[0])
+
+
+# MPLS Cisco parser
+def mpls(config):
+    config = "\n".join(config)
+
+    parser = ttp.ttp(data=config, template="cisco/templates/ios_mpls.txt")
+    parser.parse()
+
+    data = parser.result(format="json")
+
+    return json.loads(data[0])
