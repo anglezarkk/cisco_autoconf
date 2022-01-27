@@ -164,16 +164,18 @@ router bgp {{ asn }}
 
  <group name="config**" method="table">
  bgp router-id {{ bgp_rid }}
- bgp log-neighbor-changes {{ log_neighbor_changes | set(True) }}
+ bgp log-neighbor-changes {{ log-neighbor-changes | set(True) }}
  </group>
  
  <group name="neighbors**.{{ neighbor }}**" method="table">
  neighbor {{ neighbor | let("is_peer_group", True) }} peer-group
- neighbor {{ neighbor }} remote-as {{ asn }}
+ neighbor {{ neighbor }} remote-as {{ remote-as }}
  neighbor {{ neighbor }} description {{ description | re(".+") }}
- neighbor {{ neighbor }} update-source {{ update_source }}
- neighbor {{ neighbor }} peer-group {{ peer_group }}
- neighbor {{ neighbor | let("disabled", True) }} shutdown
+ neighbor {{ neighbor }} update-source {{ update-source }}
+ neighbor {{ neighbor }} peer-group {{ peer-group }}
+ neighbor {{ neighbor }} advertisement-interval {{ advertisement-interval }}
+ neighbor {{ neighbor | let("as-override", True) }} as-override
+ neighbor {{ neighbor | let("shutdown", True) }} shutdown
  neighbor {{ neighbor | let("next-hop-self", True) }} next-hop-self
  </group>
 
@@ -188,13 +190,15 @@ router bgp {{ asn }}
   
   <group name="config**" method="table">
   redistribute connected route-map {{ redistribute_connected_rpl | let("redistribute_connected", True) }}
-  redistribute connected {{ redistribute_connected | set(True) }} 
+  redistribute {{ redistribute }}
   </group>
   
   <group name="neighbors**.{{ neighbor }}**" method="table">
   neighbor {{ neighbor | let("activate", True) }} activate
-  neighbor {{ neighbor | let("next_hop_self", True) }} next-hop-self
-  neighbor {{ neighbor | let("rr_client", True) }} route-reflector-client
+  neighbor {{ neighbor | let("next-hop-self", True) }} next-hop-self
+  neighbor {{ neighbor | let("route-reflector-client", True) }} route-reflector-client
+  neighbor {{ neighbor }} advertisement-interval {{ advertisement-interval }}
+  neighbor {{ neighbor }} send-community {{ send-community }}
   neighbor {{ neighbor }} prefix-list {{ pfl_out }} out
   neighbor {{ neighbor }} prefix-list {{ pfl_in }} in
   neighbor {{ neighbor }} route-map {[ rpl_in }} in
@@ -216,16 +220,18 @@ router bgp {{ asn }}
   <group name="config**" method="table">
   bgp router-id {{ bgp_rid }}
   redistribute connected route-map {{ redistribute_connected_rpl | let("redistribute_connected", True) }}
-  redistribute connected {{ redistribute_connected | set(True) }}
+  redistribute {{ redistribute }}
   </group>
  
   <group name="neighbors**.{{ neighbor }}**" method="table">  
-  neighbor {{ neighbor }} remote-as {{ asn }}
+  neighbor {{ neighbor }} remote-as {{ remote-as }}
   neighbor {{ neighbor }} description {{ description | re(".+") }}
+  neighbor {{ neighbor }} advertisement-interval {{ advertisement-interval }}
   neighbor {{ neighbor | let("activate", True) }} activate
-  neighbor {{ neighbor | let("disabled", True) }} shutdown
-  neighbor {{ neighbor | let("next_hop_self", True) }} next-hop-self
-  neighbor {{ neighbor | let("rr_client", True) }} route-reflector-client
+  neighbor {{ neighbor | let("shutdown", True) }} shutdown
+  neighbor {{ neighbor | let("next-hop-self", True) }} next-hop-self
+  neighbor {{ neighbor | let("rr-client", True) }} route-reflector-client
+  neighbor {{ neighbor | let("as-override", True) }} as-override
   neighbor {{ neighbor }} prefix-list {{ pfl_out }} out
   neighbor {{ neighbor }} prefix-list {{ pfl_in }} in
   neighbor {{ neighbor }} route-map {[ rpl_in }} in

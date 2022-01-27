@@ -162,8 +162,11 @@ router ospf {{ process_id }}
 
  <group name="config**" method="table">
      <group name="redistribute**" method="table">
-     <group name="bgp**.asn**.{{ asn }}" method="table">
+        <group name="bgp**.asn**.{{ asn }}" method="table">
  redistribute bgp {{ asn | let("subnets", True) }} subnets
+        </group>
+     <group name="mpls" method="table">
+
      </group>
 
      </group>
