@@ -94,4 +94,13 @@ class Export:
         return config
 
     def mpls(self):
-        print('a')
+        config = []
+
+        if 'mpls' in self.topology:
+            for mpls_key, mpls_value in self.topology['mpls'].items():
+                if mpls_key == 'router-id':
+                    config.append('mpls ldp ' + mpls_key.replace('_', '-') + ' ' + mpls_value + ' force')
+                else:
+                    config.append('mpls ' + mpls_key.replace('_', '-') + ' ' + mpls_value)
+
+        return config
