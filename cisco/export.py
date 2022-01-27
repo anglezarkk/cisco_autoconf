@@ -34,50 +34,52 @@ class Export:
 
     def bgp(self):
         config = []
-        config.append('router bgp ' + self.topology['bgp']['asn'])
-        if 'config' in self.topology['bgp']:
-            for key, value in self.topology['bgp']['config'].items():
-                if value is True:
-                    config.append('bgp ' + key)
 
-        if 'afis' in self.topology['bgp']:
-            for afi, afi_config in self.topology['bgp']['afis'].items():
-                config.append('address-family ' + afi.split('_', 1)[0])
+        if 'bgp' in self.topology:
+            config.append('router bgp ' + self.topology['bgp']['asn'])
+            if 'config' in self.topology['bgp']:
+                for key, value in self.topology['bgp']['config'].items():
+                    if value is True:
+                        config.append('bgp ' + key)
 
-                if 'config' in afi_config:
-                    for config_key, config_value in afi_config['config'].items():
-                        config.append(config_key + ' ' + config_value)
+            if 'afis' in self.topology['bgp']:
+                for afi, afi_config in self.topology['bgp']['afis'].items():
+                    config.append('address-family ' + afi.split('_', 1)[0])
 
-                if 'neighbors' in afi_config:
-                    for neighbor_key, neighbor_value in afi_config['neighbors'].items():
-                        for neighbor_element_key, neighbor_element_value in neighbor_value.items():
-                            if neighbor_element_value is True:
-                                config.append('neighbor ' + neighbor_key + ' ' + neighbor_element_key)
-                            else:
-                                config.append('neighbor ' + neighbor_key + ' ' +
-                                              neighbor_element_key + ' ' + neighbor_element_value)
+                    if 'config' in afi_config:
+                        for config_key, config_value in afi_config['config'].items():
+                            config.append(config_key + ' ' + config_value)
 
-        if 'neighbors' in self.topology['bgp']:
-            for neighbor, neighbor_value in self.topology['bgp']['neighbors'].items():
-                for neighbor_element_key, neighbor_element_value in neighbor_value.items():
-                    config.append('neighbor ' + neighbor + ' ' + neighbor_element_key + ' ' + neighbor_element_value)
+                    if 'neighbors' in afi_config:
+                        for neighbor_key, neighbor_value in afi_config['neighbors'].items():
+                            for neighbor_element_key, neighbor_element_value in neighbor_value.items():
+                                if neighbor_element_value is True:
+                                    config.append('neighbor ' + neighbor_key + ' ' + neighbor_element_key)
+                                else:
+                                    config.append('neighbor ' + neighbor_key + ' ' +
+                                                  neighbor_element_key + ' ' + neighbor_element_value)
 
-        if 'vrfs' in self.topology['bgp']:
-            for vrf, vrf_value in self.topology['bgp']['vrfs'].items():
-                config.append('address-family ' + vrf_value['afi'] + ' vrf ' + vrf)
+            if 'neighbors' in self.topology['bgp']:
+                for neighbor, neighbor_value in self.topology['bgp']['neighbors'].items():
+                    for neighbor_element_key, neighbor_element_value in neighbor_value.items():
+                        config.append('neighbor ' + neighbor + ' ' + neighbor_element_key + ' ' + neighbor_element_value)
 
-                if 'config' in vrf_value:
-                    for config_key, config_value in vrf_value['config'].items():
-                        config.append(config_key + ' ' + config_value)
+            if 'vrfs' in self.topology['bgp']:
+                for vrf, vrf_value in self.topology['bgp']['vrfs'].items():
+                    config.append('address-family ' + vrf_value['afi'] + ' vrf ' + vrf)
 
-                if 'neighbors' in vrf_value:
-                    for neighbor, neighbor_value in vrf_value['neighbors'].items():
-                        for neighbor_element_key, neighbor_element_value in neighbor_value.items():
-                            if neighbor_element_value is True:
-                                config.append('neighbor ' + neighbor + ' ' + neighbor_element_key)
-                            else:
-                                config.append('neighbor ' + neighbor + ' ' + neighbor_element_key +
-                                              ' ' + neighbor_element_value)
+                    if 'config' in vrf_value:
+                        for config_key, config_value in vrf_value['config'].items():
+                            config.append(config_key + ' ' + config_value)
+
+                    if 'neighbors' in vrf_value:
+                        for neighbor, neighbor_value in vrf_value['neighbors'].items():
+                            for neighbor_element_key, neighbor_element_value in neighbor_value.items():
+                                if neighbor_element_value is True:
+                                    config.append('neighbor ' + neighbor + ' ' + neighbor_element_key)
+                                else:
+                                    config.append('neighbor ' + neighbor + ' ' + neighbor_element_key +
+                                                  ' ' + neighbor_element_value)
 
         return config
 
