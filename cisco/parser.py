@@ -37,3 +37,13 @@ def mpls(config):
     data = parser.result(format="json")
 
     return json.loads(data[0])
+
+
+# VRF Cisco parser
+def vrf(config):
+    config = "\n".join(config)
+    parser = ttp.ttp(data=config, template="cisco/templates/ios_vrf.txt")
+    parser.parse()
+
+    data = parser.result(format="json")
+    return json.loads(data[0])

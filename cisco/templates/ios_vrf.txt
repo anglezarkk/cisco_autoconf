@@ -1,0 +1,27 @@
+<doc>
+Template to parse Cisco IOS MPLS configuration.
+
+Requirements: `TTP >= 0.7.x`
+
+Sample device output:
+```
+ip vrf vpn1
+ rd 400:1
+ route-target export 400:1
+ route-target import 400:1
+!
+```
+
+After parsing above output, TTP should produce these results:
+```
+
+```
+</doc>
+
+
+<group name="{{ vrf }}**" method="table">
+ip vrf {{ vrf }}
+ rd {{ rd }}
+ route-target export {{ route-target_export }}
+ route-target import {{ route-target_import }}
+ </group>

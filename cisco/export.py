@@ -28,7 +28,7 @@ class Export:
             if not interface['shutdown']:
                 config.append('no shutdown')
 
-            config.append('exit')
+            # config.append('exit')
 
         return config
 
@@ -41,6 +41,12 @@ class Export:
                 for key, value in self.topology['bgp']['config'].items():
                     if value is True:
                         config.append('bgp ' + key)
+
+            if 'neighbors' in self.topology['bgp']:
+                for neighbor, neighbor_value in self.topology['bgp']['neighbors'].items():
+                    for neighbor_element_key, neighbor_element_value in neighbor_value.items():
+                        config.append(
+                            'neighbor ' + neighbor + ' ' + neighbor_element_key + ' ' + neighbor_element_value)
 
             if 'afis' in self.topology['bgp']:
                 for afi, afi_config in self.topology['bgp']['afis'].items():
@@ -58,11 +64,7 @@ class Export:
                                 else:
                                     config.append('neighbor ' + neighbor_key + ' ' +
                                                   neighbor_element_key + ' ' + neighbor_element_value)
-
-            if 'neighbors' in self.topology['bgp']:
-                for neighbor, neighbor_value in self.topology['bgp']['neighbors'].items():
-                    for neighbor_element_key, neighbor_element_value in neighbor_value.items():
-                        config.append('neighbor ' + neighbor + ' ' + neighbor_element_key + ' ' + neighbor_element_value)
+                    config.append('exit-address-family')
 
             if 'vrfs' in self.topology['bgp']:
                 for vrf, vrf_value in self.topology['bgp']['vrfs'].items():
@@ -80,6 +82,7 @@ class Export:
                                 else:
                                     config.append('neighbor ' + neighbor + ' ' + neighbor_element_key +
                                                   ' ' + neighbor_element_value)
+                    config.append('exit-address-family')
 
         return config
 
@@ -99,8 +102,33 @@ class Export:
         if 'mpls' in self.topology:
             for mpls_key, mpls_value in self.topology['mpls'].items():
                 if mpls_key == 'router-id':
-                    config.append('mpls ldp ' + mpls_key.replace('_', '-') + ' ' + mpls_value + ' force')
+                    config.append('mpls ldp ' + mpls_key.replace('_', ' ') + ' ' + mpls_value + ' force')
                 else:
-                    config.append('mpls ' + mpls_key.replace('_', '-') + ' ' + mpls_value)
+                    config.append('mpls ' + mpls_key.replace('_', ' ') + ' ' + mpls_value)
 
         return config
+
+    def vrfs(self):
+        config = []
+
+        if 'vrfs' in self.topology:
+            for vrf_key, vrf_value in self.topology['vrfs'].items():
+                config.append('ip vrf ' + vrf_key)
+                for vrf_item_key, vrf_item_value in vrf_value.items():
+                    config.append(vrf_item_key.replace('_', ' ') + ' ' + vrf_item_value)
+
+        return config
+
+    def generate_config(self):
+        config_lines = [self.vrfs(), self.interfaces(), self.ospf(), self.bgp(), self.mpls()]
+
+        with open("./config/exported_" + self.router_name + ".cfg", "w", encoding="utf-8") as fp:
+            with open("./config/default.cfg", "r", encoding="utf-8") as fp_default:
+                fp.write(fp_default.read())
+
+            fp.write('hostname ' + self.router_name + '\n')
+            for config_element in config_lines:
+                for config_line in config_element:
+                    fp.write(config_line + '\n')
+
+            fp.write('end\n')
