@@ -1,0 +1,79 @@
+{
+  "asn_core": 400,
+  "internal_auto_allocation_prefix": "10.0.0.0/8",
+  "customer_auto_allocation_prefix": "192.168.0.0/16",
+
+  "core_routers": {
+    "R1": {
+      "ip_loopback": "1.1.1.1",
+      "Ethernet1/0": "R2",
+      "Ethernet1/1": "R3",
+      "Ethernet1/2": "PE1"
+    },
+    "R2":
+    {
+      "ip_loopback": "2.2.2.2",
+      "Ethernet1/0": "R1",
+      "Ethernet1/1": "R4",
+      "Ethernet1/2": "PE2"
+    },
+    "R3":
+    {
+      "ip_loopback": "3.3.3.3",
+      "Ethernet1/0": "R1",
+      "Ethernet1/1": "R4",
+      "Ethernet1/2": "PE1"
+    },
+    "R4":
+    {
+      "ip_loopback": "4.4.4.4",
+      "Ethernet1/0": "R4",
+      "Ethernet1/1": "R3",
+      "Ethernet1/2": "PE2"
+    }
+  },
+
+
+  "as_border_routers":{
+    "PE1": {
+      "ip_loopback": "9.9.9.9",
+      "Ethernet1/0": "R1",
+      "Ethernet1/1": "R3"
+    },
+    "PE2": {
+      "ip_loopback": "10.10.10.10",
+      "Ethernet1/0": "R2",
+      "Ethernet1/1": "R4"
+    }
+  },
+
+  "customer_routers": {
+    "CE1": {
+      "ip_loopback": "1.0.0.1",
+      "Ethernet1/0": "PE1",
+      "Ethernet1/1": "lan",
+      "vpn": [1]
+    },
+    "CE2": {
+      "ip_loopback": "1.0.0.2",
+      "Ethernet1/0": "PE2",
+      "Ethernet1/1": "lan",
+      "vpn": [1]
+    },
+    "CE3": {
+      "ip_loopback": "2.0.0.1",
+      "Ethernet1/0": "PE1",
+      "Ethernet1/1": "lan",
+      "vpn": [2]
+    },
+    "CE4": {
+      "ip_loopback": "2.0.0.2",
+      "Ethernet1/0": "PE2",
+      "Ethernet1/1": "lan",
+      "vpn": [2]
+    }
+  },
+
+  "bgp_auto_peering_asbr": true,
+  "mpls_bgp_vpn": true
+}
