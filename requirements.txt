@@ -18,3 +18,4 @@ toml==0.10.2
     # via ciscoconfparse
 ttp==0.8.3
     # via -r requirements
+netaddr~=0.8.0
