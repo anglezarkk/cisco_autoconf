@@ -7,11 +7,11 @@ import cisco.enrich
 
 
 if __name__ == '__main__':
-    # Dump config from GNS3
+    # # Dump config from GNS3
     # routers = cisco.config.get_routers_from_config()
     # cisco.config.dump(routers)
-
-    # Topology analysis
+    #
+    # # Topology analysis
     # topology = cisco.topology.Topology(routers)
     # topology.output_topology()
 

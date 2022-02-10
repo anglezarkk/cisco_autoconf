@@ -93,10 +93,20 @@ class Enrich:
             ip = self._get_internal_subnet()
             ip = IPNetwork(ip)
             ip.value += 1
-        elif neighbor in self.simplified_json["customer_routers"]:
+        if neighbor in self.simplified_json["customer_routers"]:
             ip = self._get_customer_subnet()
             ip = IPNetwork(ip)
             ip.value += 1
+        else:
+            for interface in self.enriched_json[neighbor]["interfaces"]:
+                if "target_router" in self.enriched_json[neighbor]["interfaces"][interface]:
+                    if self.enriched_json[neighbor]["interfaces"][interface]["target_router"] == router:
+                        ip = self.enriched_json[neighbor]["interfaces"][interface]["ipv4"]
+            self.enriched_json[router]["ospf"]["networks"][ip.split("/")[0]] = \
+                {
+                    "area": "0",
+                    "mask": "0.0.0.255"
+                }
 
         if neighbor in self.enriched_json:
             for interface in self.enriched_json[neighbor]["interfaces"]:
@@ -112,9 +122,10 @@ class Enrich:
         for current_router in self.simplified_json["as_border_routers"]:
             for other_router in [router for router in self.simplified_json["as_border_routers"] if
                                  router != current_router]:
+                ip_loopback = self.simplified_json["as_border_routers"][other_router]["ip_loopback"]
                 self.enriched_json[current_router]["bgp"]["afis"]["ipv4_unicast"]["neighbors"] = \
                     {
-                        self.simplified_json["as_border_routers"][other_router]["ip_loopback"]:
+                        ip_loopback:
                             {
                                 "activate": True,
                                 "next-hop-self": True
@@ -122,11 +133,16 @@ class Enrich:
                     }
                 self.enriched_json[current_router]["bgp"]["afis"]["vpnv4_unicast"]["neighbors"] = \
                     {
-                        self.simplified_json["as_border_routers"][other_router]["ip_loopback"]:
+                        ip_loopback:
                             {
                                 "activate": True,
                                 "send-community": "extended"
                             }
+                    }
+                self.enriched_json[current_router]["neighbors"][ip_loopback] = \
+                    {
+                        "remote-as": self.simplified_json["asn_core"],
+                        "update-source": "Loopback0"
                     }
 
     def _get_internal_subnet(self):
