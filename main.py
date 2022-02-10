@@ -16,5 +16,6 @@ if __name__ == '__main__':
     # topology.output_topology()
 
     enrich = cisco.enrich.Enrich("./config/simple.json")
-    enrich.handle_cores()
+    enrich.handle_core_routers()
+    enrich.handle_edge_routers()
     enrich.export("./config/test.json")

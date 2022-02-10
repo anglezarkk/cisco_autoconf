@@ -1,0 +1,29 @@
+{
+    "bgp": {
+        "afis": {
+            "ipv4_unicast": {
+                "neighbors": {}
+            },
+            "vpnv4_unicast": {
+                "neighbors": {}
+            }
+        }
+    },
+    "config": {
+        "log-neighbor-changes": true
+    },
+    "neighbors": {},
+    "vrfs": {},
+    "ospf": {
+        "process_id": "1"
+    },
+    "mpls": {
+        "label_protocol": "ldp",
+        "router-id": "Loopback0"
+    },
+    "interfaces": {
+        "Loopback0": {
+            "shutdown": false
+        }
+    }
+}
