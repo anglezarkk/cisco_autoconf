@@ -6,21 +6,30 @@ from netaddr import IPNetwork
 class Enrich:
     simplified_json = {}
     enriched_json = {}
+    internal_ip = ""
     internal_subnets = ""
+    border_ip = ""
+    border_subnets = ""
+    customer_ip = ""
     customer_subnets = ""
     mpls_bgp_vpn = False
     bgp_auto_peering = False
+    as_id = 100
 
     def __init__(self, file_path):
         with open(file_path) as json_file:
             self.simplified_json = json.load(json_file)
-            internal_ip = IPNetwork(self.simplified_json["internal_auto_allocation_prefix"])
-            customer_ip = IPNetwork(self.simplified_json["customer_auto_allocation_prefix"])
+
+            self.internal_ip = IPNetwork(self.simplified_json["internal_auto_allocation_prefix"])
+            self.border_ip = IPNetwork(self.simplified_json["border_auto_allocation_prefix"])
+            self.customer_ip = IPNetwork(self.simplified_json["customer_auto_allocation_prefix"])
+
             self.bgp_auto_peering = self.simplified_json["bgp_auto_peering_asbr"]
             self.mpls_bgp_vpn = self.simplified_json["mpls_bgp_vpn"]
 
-        self.internal_subnets = list(internal_ip.subnet(prefixlen=30, count=100))
-        self.customer_subnets = list(customer_ip.subnet(prefixlen=24, count=100))
+        self.internal_subnets = list(self.internal_ip.subnet(prefixlen=30, count=100))
+        self.border_subnets = list(self.border_ip.subnet(prefixlen=28, count=100))
+        self.customer_subnets = list(self.customer_ip.subnet(prefixlen=24, count=100))
 
     def handle_core_routers(self):
         template = open("./cisco/templates/core_routers_enrichment.json").read()
@@ -36,7 +45,7 @@ class Enrich:
         template = open("./cisco/templates/edge_routers_enrichment.json").read()
         for edge in self.simplified_json["as_border_routers"]:
             self.enriched_json[edge] = json.loads(template)
-            self.enriched_json[edge]["bgp"]["asn"] = self.simplified_json["asn_core"]
+            self.enriched_json[edge]["bgp"]["asn"] = str(self.simplified_json["asn_core"])
             for field in self.simplified_json["as_border_routers"][edge]:
                 if field == "ip_loopback":
                     self._add_loopback(edge, self.simplified_json["as_border_routers"][edge][field])
@@ -44,9 +53,24 @@ class Enrich:
                     self._add_edge_neighbor(edge, field)
         self._config_bgp_on_edges()
 
+    def handle_customer_routers(self):
+        template = open("./cisco/templates/customer_routers_enrichment.json").read()
+        for customer in self.simplified_json["customer_routers"]:
+            self.enriched_json[customer] = json.loads(template)
+            self.enriched_json[customer]["bgp"]["asn"] = str(self.as_id)
+            self.as_id += 1
+            for field in self.simplified_json["customer_routers"][customer]:
+                if field == "ip_loopback":
+                    self._add_loopback(customer, self.simplified_json["customer_routers"][customer][field])
+                elif field == "vpn":
+                    pass
+                else:
+                    self._add_customer_neighbor(customer, field)
+        self._config_vpns()
+
     def _add_loopback(self, router, ip_loopback):
         self.enriched_json[router]["interfaces"]["Loopback0"]["ipv4"] = ip_loopback + "/32"
-        if "network" in self.enriched_json[router]["ospf"]:
+        if "ospf" in self.enriched_json[router] and "network" in self.enriched_json[router]["ospf"]:
             self.enriched_json[router]["ospf"]["networks"][ip_loopback] = \
                 {
                     "area": "0",
@@ -94,7 +118,7 @@ class Enrich:
             ip = IPNetwork(ip)
             ip.value += 1
         if neighbor in self.simplified_json["customer_routers"]:
-            ip = self._get_customer_subnet()
+            ip = self._get_border_subnet()
             ip = IPNetwork(ip)
             ip.value += 1
         else:
@@ -141,18 +165,58 @@ class Enrich:
                     }
                 self.enriched_json[current_router]["neighbors"][ip_loopback] = \
                     {
-                        "remote-as": self.simplified_json["asn_core"],
+                        "remote-as": str(self.simplified_json["asn_core"]),
                         "update-source": "Loopback0"
                     }
+
+    def _add_customer_neighbor(self, router, neighbor_interface):
+        neighbor = self.simplified_json["customer_routers"][router][neighbor_interface]
+        self.enriched_json[router]["interfaces"][neighbor_interface] = \
+            {
+                "target_router": neighbor,
+                "target_interface": neighbor_interface,
+                "shutdown": False
+            }
+        if neighbor != "lan":
+            for interface in self.enriched_json[neighbor]["interfaces"]:
+                if "target_router" in self.enriched_json[neighbor]["interfaces"][interface]:
+                    if self.enriched_json[neighbor]["interfaces"][interface]["target_router"] == router:
+                        ip = self.enriched_json[neighbor]["interfaces"][interface]["ipv4"].split("/")[0]
+                        self.enriched_json[router]["bgp"]["afis"]["ipv4_unicast"]["neighbors"][ip] = \
+                            {
+                                "activate": True,
+                                "advertisement-interval": "5"
+                            }
+                        break
+
+        if neighbor in self.enriched_json:
+            for interface in self.enriched_json[neighbor]["interfaces"]:
+                if interface != "Loopback0" and router in self.enriched_json[neighbor]["interfaces"][interface][
+                    "target_router"]:
+                    ip = IPNetwork(self.enriched_json[neighbor]["interfaces"][interface]["ipv4"])
+                    ip.value += 1
+                    self.enriched_json[router]["interfaces"][neighbor_interface]["ipv4"] = str(ip)
+                    return
+        ip = self._get_customer_subnet()
+        ip = IPNetwork(ip)
+        ip.value += 1
+        self.enriched_json[router]["interfaces"][neighbor_interface]["ipv4"] = str(ip)
+
+    def _config_vpns(self):
+        pass
 
     def _get_internal_subnet(self):
         ip = str(self.internal_subnets[0])
         del self.internal_subnets[0]
         return ip
 
+    def _get_border_subnet(self):
+        ip = str(self.border_subnets[0])
+        del self.border_subnets[0]
+        return ip
+
     def _get_customer_subnet(self):
         ip = str(self.customer_subnets[0])
-        del self.customer_subnets[0]
         return ip
 
     def export(self, file_path):

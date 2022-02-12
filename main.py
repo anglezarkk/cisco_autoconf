@@ -18,4 +18,5 @@ if __name__ == '__main__':
     enrich = cisco.enrich.Enrich("./config/simple.json")
     enrich.handle_core_routers()
     enrich.handle_edge_routers()
+    enrich.handle_customer_routers()
     enrich.export("./config/test.json")

@@ -1,6 +1,7 @@
 {
   "asn_core": 400,
   "internal_auto_allocation_prefix": "10.0.0.0/8",
+  "border_auto_allocation_prefix": "172.16.0.0/16",
   "customer_auto_allocation_prefix": "192.168.0.0/16",
   "core_routers": {
     "R1": {
@@ -34,13 +35,13 @@
       "Ethernet1/0": "R1",
       "Ethernet1/1": "R3",
       "Ethernet1/2": "CE1",
-      "Ethernet1/3": "CE2"
+      "Ethernet1/3": "CE3"
     },
     "PE2": {
       "ip_loopback": "10.10.10.10",
       "Ethernet1/0": "R2",
       "Ethernet1/1": "R4",
-      "Ethernet1/2": "CE3",
+      "Ethernet1/2": "CE2",
       "Ethernet1/3": "CE4"
     }
   },
