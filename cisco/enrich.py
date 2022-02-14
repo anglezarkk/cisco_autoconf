@@ -91,7 +91,7 @@ class Enrich:
         self.enriched_json[router]["ospf"]["networks"][ip.split("/")[0]] = \
             {
                 "area": "0",
-                "mask": "255.255.255.3"
+                "mask": "0.0.0.3"
             }
         ip = IPNetwork(ip)
         ip.value += 1
