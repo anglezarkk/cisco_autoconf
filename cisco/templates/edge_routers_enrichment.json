@@ -7,13 +7,13 @@
             "vpnv4_unicast": {
                 "neighbors": {}
             }
-        }
+        },
+        "config": {
+            "log-neighbor-changes": true
+        },
+        "neighbors": {},
+        "vrfs": {}
     },
-    "config": {
-        "log-neighbor-changes": true
-    },
-    "neighbors": {},
-    "vrfs": {},
     "ospf": {
         "mpls": {
             "ldp": "autoconfig"

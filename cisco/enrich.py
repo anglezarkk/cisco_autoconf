@@ -28,7 +28,7 @@ class Enrich:
             self.mpls_bgp_vpn = self.simplified_json["mpls_bgp_vpn"]
 
         self.internal_subnets = list(self.internal_ip.subnet(prefixlen=30, count=100))
-        self.border_subnets = list(self.border_ip.subnet(prefixlen=28, count=100))
+        self.border_subnets = list(self.border_ip.subnet(prefixlen=30, count=100))
         self.customer_subnets = list(self.customer_ip.subnet(prefixlen=24, count=100))
 
     def handle_core_routers(self):
@@ -54,11 +54,19 @@ class Enrich:
         self._config_bgp_on_edges()
 
     def handle_customer_routers(self):
+        vpns_list = {}
         template = open("./cisco/templates/customer_routers_enrichment.json").read()
         for customer in self.simplified_json["customer_routers"]:
             self.enriched_json[customer] = json.loads(template)
+
             self.enriched_json[customer]["bgp"]["asn"] = str(self.as_id)
             self.as_id += 1
+
+            for vpn in self.simplified_json["customer_routers"][customer]["vpn"]:
+                if not vpn in vpns_list:
+                    vpns_list[vpn] = []
+                vpns_list[vpn].append(customer)
+
             for field in self.simplified_json["customer_routers"][customer]:
                 if field == "ip_loopback":
                     self._add_loopback(customer, self.simplified_json["customer_routers"][customer][field])
@@ -66,7 +74,8 @@ class Enrich:
                     pass
                 else:
                     self._add_customer_neighbor(customer, field)
-        self._config_vpns()
+        if self.mpls_bgp_vpn:
+            self._config_vpns(vpns_list)
 
     def _add_loopback(self, router, ip_loopback):
         self.enriched_json[router]["interfaces"]["Loopback0"]["ipv4"] = ip_loopback + "/32"
@@ -163,7 +172,7 @@ class Enrich:
                                 "send-community": "extended"
                             }
                     }
-                self.enriched_json[current_router]["neighbors"][ip_loopback] = \
+                self.enriched_json[current_router]["bgp"]["neighbors"][ip_loopback] = \
                     {
                         "remote-as": str(self.simplified_json["asn_core"]),
                         "update-source": "Loopback0"
@@ -202,8 +211,35 @@ class Enrich:
         ip.value += 1
         self.enriched_json[router]["interfaces"][neighbor_interface]["ipv4"] = str(ip)
 
-    def _config_vpns(self):
-        pass
+    def _config_vpns(self, vpns_list):
+        for router in self.simplified_json["as_border_routers"]:
+            for vpn in vpns_list:
+                for customer_router in vpns_list[vpn]:
+                    for field in self.simplified_json["as_border_routers"][router]:
+                        if customer_router == self.simplified_json["as_border_routers"][router][field]:
+                            neighbor_ip = ""
+                            neighbor_as = self.enriched_json[customer_router]["bgp"]["asn"]
+                            for interface in (i for i in self.enriched_json[router]["interfaces"] if i != "Loopback0"):
+                                if self.enriched_json[router]["interfaces"][interface]["target_router"] \
+                                        == customer_router:
+                                    neighbor_ip = self.enriched_json[router]["interfaces"][interface]["ipv4"]
+
+                            self.enriched_json[router]["bgp"]["vrfs"]["vpn{}".format(vpn)] = \
+                                {
+                                    "afi": "ipv4",
+                                    "config": {
+                                        "redistribute": "connected"
+                                    },
+                                    "neighbors": {
+                                        neighbor_ip: {
+                                            "activate": True,
+                                            "advertisement-interval": "5",
+                                            "as-override": True,
+                                            "remote-as": neighbor_as
+                                        }
+                                    }
+                                }
+                            break
 
     def _get_internal_subnet(self):
         ip = str(self.internal_subnets[0])
