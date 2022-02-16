@@ -22,7 +22,11 @@ class Export:
             interface = self.topology['interfaces'][interface_name]
             ip_net = ipaddress.IPv4Interface(interface['ipv4'])
 
+
             config.append('interface ' + interface_name)
+            if 'vrf_forwarding' in interface:
+                config.append('ip vrf forwarding ' + interface['vrf_forwarding'])
+
             config.append('ip address ' + str(ip_net.ip) + ' ' + str(ip_net.netmask))
 
             if not interface['shutdown']:
