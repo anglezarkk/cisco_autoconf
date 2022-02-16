@@ -51,7 +51,8 @@ class Enrich:
                     self._add_loopback(edge, self.simplified_json["as_border_routers"][edge][field])
                 else:
                     self._add_edge_neighbor(edge, field)
-        self._config_bgp_on_edges()
+        if self.bgp_auto_peering:
+            self._config_bgp_on_edges()
 
     def handle_customer_routers(self):
         vpns_list = {}
