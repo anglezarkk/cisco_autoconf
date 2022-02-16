@@ -144,8 +144,8 @@ class Enrich:
             for interface in self.enriched_json[neighbor]["interfaces"]:
                 if "target_router" in self.enriched_json[neighbor]["interfaces"][interface]:
                     if self.enriched_json[neighbor]["interfaces"][interface]["target_router"] == router:
-                        ip = self.enriched_json[neighbor]["interfaces"][interface]["ipv4"]
-            self.enriched_json[router]["ospf"]["networks"][ip.split("/")[0]] = \
+                        ip = IPNetwork(self.enriched_json[neighbor]["interfaces"][interface]["ipv4"]).network
+            self.enriched_json[router]["ospf"]["networks"][str(ip)] = \
                 {
                     "area": "0",
                     "mask": "0.0.0.3"
