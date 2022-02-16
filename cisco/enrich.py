@@ -239,10 +239,10 @@ class Enrich:
                             neighbor_ip = ""
                             neighbor_as = self.enriched_json[customer_router]["bgp"]["asn"]
 
-                            for interface in (i for i in self.enriched_json[router]["interfaces"] if i != "Loopback0"):
-                                if self.enriched_json[router]["interfaces"][interface]["target_router"] \
-                                        == customer_router:
-                                    neighbor_ip = self.enriched_json[router]["interfaces"][interface]["ipv4"]
+                            for interface in (i for i in self.enriched_json[customer_router]["interfaces"] if
+                                              i != "Loopback0"):
+                                if self.enriched_json[customer_router]["interfaces"][interface]["target_router"] == router:
+                                    neighbor_ip = self.enriched_json[customer_router]["interfaces"][interface]["ipv4"]
 
                             self.enriched_json[router]["bgp"]["vrfs"]["vpn{}".format(vpn)] = \
                                 {
