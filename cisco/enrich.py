@@ -206,7 +206,6 @@ class Enrich:
                 if "target_router" in self.enriched_json[neighbor]["interfaces"][interface]:
                     if self.enriched_json[neighbor]["interfaces"][interface]["target_router"] == router:
                         ip = self.enriched_json[neighbor]["interfaces"][interface]["ipv4"].split("/")[0]
-                        # TODO: ip in another subnet if one already in the vpn
                         self.enriched_json[router]["bgp"]["afis"]["ipv4_unicast"]["neighbors"][ip] = \
                             {
                                 "activate": True,
@@ -284,6 +283,7 @@ class Enrich:
 
     def _get_customer_subnet(self):
         ip = str(self.customer_subnets[0])
+        del self.customer_subnets[0]
         return ip
 
     def export(self, file_path):
