@@ -55,7 +55,13 @@ class Enrich:
             self.enriched_json[edge]["bgp"]["asn"] = str(self.simplified_json["asn_core"])
             for field in self.simplified_json["as_border_routers"][edge]:
                 if field == "ip_loopback":
-                    self._add_loopback(edge, self.simplified_json["as_border_routers"][edge][field])
+                    ip_loopback = self.simplified_json["as_border_routers"][edge][field]
+                    self._add_loopback(edge, ip_loopback)
+                    self.enriched_json[edge]["ospf"]["networks"][ip_loopback.split("/")[0]] = \
+                        {
+                            "area": "0",
+                            "mask": "0.0.0.0"
+                        }
                 else:
                     self._add_edge_neighbor(edge, field)
         if self.bgp_auto_peering:
