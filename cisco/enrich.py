@@ -122,6 +122,9 @@ class Enrich:
                 "shutdown": False
             }
 
+        if neighbor in self.simplified_json["core_routers"]:
+            self.enriched_json[router]["interfaces"][neighbor_interface]["mpls"] = "ip"
+
         if neighbor in self.simplified_json["as_border_routers"]:
             ip = self._get_internal_subnet()
             ip = IPNetwork(ip)
@@ -219,6 +222,7 @@ class Enrich:
                         if customer_router == self.simplified_json["as_border_routers"][router][field]:
                             neighbor_ip = ""
                             neighbor_as = self.enriched_json[customer_router]["bgp"]["asn"]
+
                             for interface in (i for i in self.enriched_json[router]["interfaces"] if i != "Loopback0"):
                                 if self.enriched_json[router]["interfaces"][interface]["target_router"] \
                                         == customer_router:
@@ -231,7 +235,7 @@ class Enrich:
                                         "redistribute": "connected"
                                     },
                                     "neighbors": {
-                                        neighbor_ip: {
+                                        neighbor_ip.split("/")[0]: {
                                             "activate": True,
                                             "advertisement-interval": "5",
                                             "as-override": True,
@@ -239,6 +243,16 @@ class Enrich:
                                         }
                                     }
                                 }
+
+                            router_as = self.enriched_json[router]["bgp"]["asn"]
+                            self.enriched_json[router]["vrfs"]["vpn{}".format(vpn)] = \
+                                {
+                                    "rd": "{}:{}".format(router_as, vpn),
+                                    "route-target_export": "{}:{}".format(router_as, vpn),
+                                    "route-target_import": "{}:{}".format(router_as, vpn)
+                                }
+
+                            self.enriched_json[router]["interfaces"][field]["vrf_forwarding"] = "vpn{}".format(vpn)
                             break
 
     def _get_internal_subnet(self):

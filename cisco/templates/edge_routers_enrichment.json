@@ -14,6 +14,9 @@
         "neighbors": {},
         "vrfs": {}
     },
+    "vrfs": {
+
+    },
     "ospf": {
         "mpls": {
             "ldp": "autoconfig"
