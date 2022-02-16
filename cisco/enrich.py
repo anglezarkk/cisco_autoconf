@@ -200,6 +200,10 @@ class Enrich:
                                 "activate": True,
                                 "advertisement-interval": "5"
                             }
+                        self.enriched_json[router]["bgp"]["neighbors"][ip] = \
+                            {
+                                "remote-as": self.enriched_json[neighbor]["bgp"]["asn"]
+                            }
                         break
 
         if neighbor in self.enriched_json:
