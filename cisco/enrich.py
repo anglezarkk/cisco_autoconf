@@ -241,24 +241,35 @@ class Enrich:
 
                             for interface in (i for i in self.enriched_json[customer_router]["interfaces"] if
                                               i != "Loopback0"):
-                                if self.enriched_json[customer_router]["interfaces"][interface]["target_router"] == router:
+                                if self.enriched_json[customer_router]["interfaces"][interface][
+                                    "target_router"] == router:
                                     neighbor_ip = self.enriched_json[customer_router]["interfaces"][interface]["ipv4"]
 
-                            self.enriched_json[router]["bgp"]["vrfs"]["vpn{}".format(vpn)] = \
-                                {
-                                    "afi": "ipv4",
-                                    "config": {
-                                        "redistribute": "connected"
-                                    },
-                                    "neighbors": {
-                                        neighbor_ip.split("/")[0]: {
-                                            "activate": True,
-                                            "advertisement-interval": "5",
-                                            "as-override": True,
-                                            "remote-as": neighbor_as
+                            if "vpn{}".format(vpn) not in self.enriched_json[router]["bgp"]["vrfs"]:
+                                self.enriched_json[router]["bgp"]["vrfs"]["vpn{}".format(vpn)] = \
+                                    {
+                                        "afi": "ipv4",
+                                        "config": {
+                                            "redistribute": "connected"
+                                        },
+                                        "neighbors": {
+                                            neighbor_ip.split("/")[0]: {
+                                                "activate": True,
+                                                "advertisement-interval": "5",
+                                                "as-override": True,
+                                                "remote-as": neighbor_as
+                                            }
                                         }
                                     }
-                                }
+                            else:
+                                self.enriched_json[router]["bgp"]["vrfs"]["vpn{}".format(vpn)]["neighbors"][
+                                    neighbor_ip.split("/")[0]] = \
+                                    {
+                                        "activate": True,
+                                        "advertisement-interval": "5",
+                                        "as-override": True,
+                                        "remote-as": neighbor_as
+                                    }
 
                             router_as = self.enriched_json[router]["bgp"]["asn"]
                             self.enriched_json[router]["vrfs"]["vpn{}".format(vpn)] = \
