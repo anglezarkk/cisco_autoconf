@@ -40,11 +40,6 @@ class Enrich:
                 if field == "ip_loopback":
                     ip_loopback = self.simplified_json["core_routers"][core][field]
                     self._add_loopback(core, ip_loopback)
-                    self.enriched_json[core]["ospf"]["networks"][ip_loopback.split("/")[0]] = \
-                        {
-                            "area": "0",
-                            "mask": "0.0.0.0"
-                        }
                 else:
                     self._add_core_neighbor(core, field)
 
@@ -57,11 +52,6 @@ class Enrich:
                 if field == "ip_loopback":
                     ip_loopback = self.simplified_json["as_border_routers"][edge][field]
                     self._add_loopback(edge, ip_loopback)
-                    self.enriched_json[edge]["ospf"]["networks"][ip_loopback.split("/")[0]] = \
-                        {
-                            "area": "0",
-                            "mask": "0.0.0.0"
-                        }
                 else:
                     self._add_edge_neighbor(edge, field)
         if self.bgp_auto_peering:
@@ -82,7 +72,8 @@ class Enrich:
 
             for field in self.simplified_json["customer_routers"][customer]:
                 if field == "ip_loopback":
-                    self._add_loopback(customer, self.simplified_json["customer_routers"][customer][field])
+                    ip_loopback = self.simplified_json["customer_routers"][customer][field]
+                    self._add_loopback(customer, ip_loopback)
                 elif field == "vpn":
                     pass
                 else:
@@ -92,7 +83,7 @@ class Enrich:
 
     def _add_loopback(self, router, ip_loopback):
         self.enriched_json[router]["interfaces"]["Loopback0"]["ipv4"] = ip_loopback + "/32"
-        if "ospf" in self.enriched_json[router] and "network" in self.enriched_json[router]["ospf"]:
+        if "ospf" in self.enriched_json[router] and "networks" in self.enriched_json[router]["ospf"]:
             self.enriched_json[router]["ospf"]["networks"][ip_loopback] = \
                 {
                     "area": "0",
@@ -100,7 +91,15 @@ class Enrich:
                 }
 
     def _add_core_neighbor(self, router, neighbor_interface):
-        ip = self._get_internal_subnet()
+        neighbor = self.simplified_json["core_routers"][router][neighbor_interface]
+
+        if neighbor in self.enriched_json:
+            for interface in self.enriched_json[neighbor]["interfaces"]:
+                if interface != "Loopback0" and router == self.enriched_json[neighbor]["interfaces"][interface][
+                    "target_router"]:
+                    ip = str(IPNetwork(self.enriched_json[neighbor]["interfaces"][interface]["ipv4"]).network)
+        else:
+            ip = self._get_internal_subnet()
         self.enriched_json[router]["ospf"]["networks"][ip.split("/")[0]] = \
             {
                 "area": "0",
@@ -108,7 +107,7 @@ class Enrich:
             }
         ip = IPNetwork(ip)
         ip.value += 1
-        neighbor = self.simplified_json["core_routers"][router][neighbor_interface]
+
         self.enriched_json[router]["interfaces"][neighbor_interface] = \
             {
                 "target_router": neighbor,
@@ -118,7 +117,7 @@ class Enrich:
 
         if neighbor in self.enriched_json:
             for interface in self.enriched_json[neighbor]["interfaces"]:
-                if interface != "Loopback0" and router in self.enriched_json[neighbor]["interfaces"][interface][
+                if interface != "Loopback0" and router == self.enriched_json[neighbor]["interfaces"][interface][
                     "target_router"]:
                     ip = IPNetwork(self.enriched_json[neighbor]["interfaces"][interface]["ipv4"])
                     ip.value += 1
