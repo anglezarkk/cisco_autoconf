@@ -28,6 +28,9 @@ class Export:
             if not interface['shutdown']:
                 config.append('no shutdown')
 
+            if 'mpls' in interface:
+                config.append('mpls ' + interface['mpls'])
+
             # config.append('exit')
 
         return config
@@ -76,12 +79,15 @@ class Export:
 
                     if 'neighbors' in vrf_value:
                         for neighbor, neighbor_value in vrf_value['neighbors'].items():
+                            if 'remote-as' in neighbor_value:
+                                config.append('neighbor ' + neighbor + ' remote-as ' + neighbor_value['remote-as'])
                             for neighbor_element_key, neighbor_element_value in neighbor_value.items():
-                                if neighbor_element_value is True:
-                                    config.append('neighbor ' + neighbor + ' ' + neighbor_element_key)
-                                else:
-                                    config.append('neighbor ' + neighbor + ' ' + neighbor_element_key +
-                                                  ' ' + neighbor_element_value)
+                                if neighbor_element_key != 'remote-as':
+                                    if neighbor_element_value is True:
+                                        config.append('neighbor ' + neighbor + ' ' + neighbor_element_key)
+                                    else:
+                                        config.append('neighbor ' + neighbor + ' ' + neighbor_element_key +
+                                                      ' ' + neighbor_element_value)
                     config.append('exit-address-family')
 
         return config
