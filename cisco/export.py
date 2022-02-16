@@ -91,6 +91,8 @@ class Export:
 
         if 'ospf' in self.topology:
             config.append('router ospf ' + self.topology['ospf']['process_id'])
+            for mpls_key, mpls_value in self.topology['ospf']['mpls'].items():
+                config.append('mpls ' + mpls_key + ' ' + mpls_value)
             for network, network_val in self.topology['ospf']['networks'].items():
                 config.append('network ' + network + ' ' + network_val['mask'] + ' area ' + network_val['area'])
 
