@@ -13,6 +13,7 @@ class Enrich:
     customer_ip = ""
     customer_subnets = ""
     mpls_bgp_vpn = False
+    vpns_list = {}
     bgp_auto_peering = False
     as_id = 100
 
@@ -37,7 +38,13 @@ class Enrich:
             self.enriched_json[core] = json.loads(template)
             for field in self.simplified_json["core_routers"][core]:
                 if field == "ip_loopback":
-                    self._add_loopback(core, self.simplified_json["core_routers"][core][field])
+                    ip_loopback = self.simplified_json["core_routers"][core][field]
+                    self._add_loopback(core, ip_loopback)
+                    self.enriched_json[core]["ospf"]["networks"][ip_loopback.split("/")[0]] = \
+                        {
+                            "area": "0",
+                            "mask": "0.0.0.0"
+                        }
                 else:
                     self._add_core_neighbor(core, field)
 
@@ -55,7 +62,6 @@ class Enrich:
             self._config_bgp_on_edges()
 
     def handle_customer_routers(self):
-        vpns_list = {}
         template = open("./cisco/templates/customer_routers_enrichment.json").read()
         for customer in self.simplified_json["customer_routers"]:
             self.enriched_json[customer] = json.loads(template)
@@ -64,9 +70,9 @@ class Enrich:
             self.as_id += 1
 
             for vpn in self.simplified_json["customer_routers"][customer]["vpn"]:
-                if not vpn in vpns_list:
-                    vpns_list[vpn] = []
-                vpns_list[vpn].append(customer)
+                if not vpn in self.vpns_list:
+                    self.vpns_list[vpn] = []
+                self.vpns_list[vpn].append(customer)
 
             for field in self.simplified_json["customer_routers"][customer]:
                 if field == "ip_loopback":
@@ -76,7 +82,7 @@ class Enrich:
                 else:
                     self._add_customer_neighbor(customer, field)
         if self.mpls_bgp_vpn:
-            self._config_vpns(vpns_list)
+            self._config_vpns()
 
     def _add_loopback(self, router, ip_loopback):
         self.enriched_json[router]["interfaces"]["Loopback0"]["ipv4"] = ip_loopback + "/32"
@@ -142,7 +148,7 @@ class Enrich:
             self.enriched_json[router]["ospf"]["networks"][ip.split("/")[0]] = \
                 {
                     "area": "0",
-                    "mask": "0.0.0.255"
+                    "mask": "0.0.0.3"
                 }
 
         if neighbor in self.enriched_json:
@@ -195,6 +201,7 @@ class Enrich:
                 if "target_router" in self.enriched_json[neighbor]["interfaces"][interface]:
                     if self.enriched_json[neighbor]["interfaces"][interface]["target_router"] == router:
                         ip = self.enriched_json[neighbor]["interfaces"][interface]["ipv4"].split("/")[0]
+                        # TODO: ip in another subnet if one already in the vpn
                         self.enriched_json[router]["bgp"]["afis"]["ipv4_unicast"]["neighbors"][ip] = \
                             {
                                 "activate": True,
@@ -219,10 +226,10 @@ class Enrich:
         ip.value += 1
         self.enriched_json[router]["interfaces"][neighbor_interface]["ipv4"] = str(ip)
 
-    def _config_vpns(self, vpns_list):
+    def _config_vpns(self):
         for router in self.simplified_json["as_border_routers"]:
-            for vpn in vpns_list:
-                for customer_router in vpns_list[vpn]:
+            for vpn in self.vpns_list:
+                for customer_router in self.vpns_list[vpn]:
                     for field in self.simplified_json["as_border_routers"][router]:
                         if customer_router == self.simplified_json["as_border_routers"][router][field]:
                             neighbor_ip = ""
