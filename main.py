@@ -1,15 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import json
 
 import argparse
-
-import cisco.config
-import cisco.topology
-import cisco.parser
 import cisco.enrich
 import cisco.export
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate MPLS/BGP/VPN configuration for cisco routers,'
