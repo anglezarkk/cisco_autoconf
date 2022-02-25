@@ -127,7 +127,11 @@ class Export:
             for vrf_key, vrf_value in self.topology['vrfs'].items():
                 config.append('ip vrf ' + vrf_key)
                 for vrf_item_key, vrf_item_value in vrf_value.items():
-                    config.append(vrf_item_key.replace('_', ' ') + ' ' + vrf_item_value)
+                    if isinstance(vrf_item_value, list):
+                        for routetarget in vrf_item_value:
+                            config.append(vrf_item_key.replace('_', ' ') + ' ' + routetarget)
+                    else:
+                        config.append(vrf_item_key.replace('_', ' ') + ' ' + vrf_item_value)
 
         return config
 
