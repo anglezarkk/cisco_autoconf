@@ -51,7 +51,7 @@
       "FastEthernet0/0": "PE1",
       "FastEthernet0/1": "lan",
       "vpn": [
-        1
+        1, 2, 3
       ]
     },
     "CE2": {
@@ -75,7 +75,7 @@
       "FastEthernet0/0": "PE2",
       "FastEthernet0/1": "lan",
       "vpn": [
-        2
+        3
       ]
     }
   },
