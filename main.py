@@ -4,6 +4,7 @@ import cisco.config
 import cisco.topology
 import cisco.parser
 import cisco.enrich
+import cisco.export
 
 
 if __name__ == '__main__':
@@ -20,3 +21,9 @@ if __name__ == '__main__':
     enrich.handle_edge_routers()
     enrich.handle_customer_routers()
     enrich.export("./config/test.json")
+
+    # routers = cisco.config.get_routers_from_config()
+    # for router in routers:
+    #     export = cisco.export.Export(router_name=router['name'], path='./config/test.json')
+    #     export.generate_config()
+
