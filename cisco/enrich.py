@@ -237,6 +237,7 @@ class Enrich:
             for vpn in self.vpns_list:
                 for customer_router in self.vpns_list[vpn]:
                     for field in self.simplified_json["as_border_routers"][router]:
+
                         if customer_router == self.simplified_json["as_border_routers"][router][field]:
                             neighbor_ip = ""
                             neighbor_as = self.enriched_json[customer_router]["bgp"]["asn"]
@@ -337,7 +338,9 @@ class Enrich:
                         self.enriched_json[router]["vrfs"][vpn]["route-target_import"].append("{}:{}".format(
                             router_as, single_vpn))
 
-            self.enriched_json[router]["interfaces"][field]["vrf_forwarding"] = "vpn{}".format(vpn)
+                    for field in (i for i in self.simplified_json["as_border_routers"][router] if i != "ip_loopback"):
+                        if self.simplified_json["as_border_routers"][router][field] == neighbor:
+                            self.enriched_json[router]["interfaces"][field]["vrf_forwarding"] = vpn
 
     def _get_internal_subnet(self):
         ip = str(self.internal_subnets[0])
