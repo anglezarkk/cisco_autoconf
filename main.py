@@ -1,5 +1,7 @@
 import json
 
+import argparse
+
 import cisco.config
 import cisco.topology
 import cisco.parser
@@ -8,22 +10,20 @@ import cisco.export
 
 
 if __name__ == '__main__':
-    # # Dump config from GNS3
-    # routers = cisco.config.get_routers_from_config()
-    # cisco.config.dump(routers)
-    #
-    # # Topology analysis
-    # topology = cisco.topology.Topology(routers)
-    # topology.output_topology()
+    parser = argparse.ArgumentParser(description='Generate MPLS/BGP/VPN configuration for cisco routers,'
+                                                 ' based on a simple json file.')
+    parser.add_argument('--topology', required=True,
+                        help='Path to simple json file')
 
-    enrich = cisco.enrich.Enrich("./config/simple.json")
+    args = parser.parse_args()
+
+    enrich = cisco.enrich.Enrich(str(args.topology))
     enrich.handle_core_routers()
     enrich.handle_edge_routers()
     enrich.handle_customer_routers()
-    enrich.export("./config/test.json")
+    enrich.export("./config/export.json")
 
-    # routers = cisco.config.get_routers_from_config()
-    # for router in routers:
-    #     export = cisco.export.Export(router_name=router['name'], path='./config/test.json')
-    #     export.generate_config()
+    for router in enrich.enriched_json:
+        export = cisco.export.Export(router_name=router, path='./config/export.json')
+        export.generate_config()
 
