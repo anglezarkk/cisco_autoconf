@@ -263,6 +263,7 @@ class Enrich:
                                 if direct_neighbor not in combined_vpn:
                                     combined_vpn[direct_neighbor] = ""
                                 tmp = {}
+
                                 if "vpn{}".format(combined_vpn[direct_neighbor]) in vpn_by_neighbor[direct_neighbor]:
                                     tmp = vpn_by_neighbor[direct_neighbor][
                                         "vpn{}".format(combined_vpn[direct_neighbor])]
@@ -284,21 +285,27 @@ class Enrich:
                                             "remote-as": neighbor_as
                                         }
                                 else:
-                                    vpn_by_neighbor[direct_neighbor]["vpn{}".format(combined_vpn[direct_neighbor])] = \
-                                        {
-                                            "afi": "ipv4",
-                                            "config": {
-                                                "redistribute": "connected"
-                                            },
-                                            "neighbors": {
-                                                neighbor_ip.split("/")[0]: {
-                                                    "activate": True,
-                                                    "advertisement-interval": "5",
-                                                    "as-override": True,
-                                                    "remote-as": neighbor_as
-                                                }
+                                    if not "vpn{}".format(combined_vpn[direct_neighbor]) in vpn_by_neighbor[
+                                        direct_neighbor]:
+                                        vpn_by_neighbor[direct_neighbor][
+                                            "vpn{}".format(combined_vpn[direct_neighbor])] = \
+                                            {
+                                                "afi": "ipv4",
+                                                "config": {
+                                                    "redistribute": "connected"
+                                                },
+                                                "neighbors": {}
                                             }
+
+                                    vpn_by_neighbor[direct_neighbor]["vpn{}".format(combined_vpn[direct_neighbor])][
+                                        "neighbors"][neighbor_ip.split("/")[0]] = \
+                                        {
+                                            "activate": True,
+                                            "advertisement-interval": "5",
+                                            "as-override": True,
+                                            "remote-as": neighbor_as
                                         }
+
                             elif "vpn{}".format(vpn) not in vpn_by_neighbor[direct_neighbor]:
                                 vpn_by_neighbor[direct_neighbor]["vpn{}".format(vpn)] = \
                                     {
@@ -319,7 +326,12 @@ class Enrich:
 
             for neighbor in vpn_by_neighbor:
                 for vpn in vpn_by_neighbor[neighbor]:
-                    self.enriched_json[router]["bgp"]["vrfs"][vpn] = vpn_by_neighbor[neighbor][vpn]
+                    if vpn not in self.enriched_json[router]["bgp"]["vrfs"]:
+                        self.enriched_json[router]["bgp"]["vrfs"][vpn] = vpn_by_neighbor[neighbor][vpn]
+                    else:
+                        ip = list(vpn_by_neighbor[neighbor][vpn]["neighbors"].keys())[0]
+                        self.enriched_json[router]["bgp"]["vrfs"][vpn]["neighbors"][ip] = \
+                            vpn_by_neighbor[neighbor][vpn]["neighbors"][ip]
 
             router_as = self.enriched_json[router]["bgp"]["asn"]
             for neighbor in vpn_by_neighbor:
