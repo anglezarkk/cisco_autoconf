@@ -14,9 +14,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     enrich = cisco.enrich.Enrich(str(args.topology))
-    enrich.handle_core_routers()
-    enrich.handle_edge_routers()
-    enrich.handle_customer_routers()
+    enrich.generate_config()
     enrich.export("./config/export.json")
 
     for router in enrich.enriched_json:
