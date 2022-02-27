@@ -171,22 +171,18 @@ class Enrich:
             for other_router in [router for router in self.simplified_json["as_border_routers"] if
                                  router != current_router]:
                 ip_loopback = self.simplified_json["as_border_routers"][other_router]["ip_loopback"]
-                self.enriched_json[current_router]["bgp"]["afis"]["ipv4_unicast"]["neighbors"] = \
+                self.enriched_json[current_router]["bgp"]["afis"]["ipv4_unicast"]["neighbors"][ip_loopback] = \
                     {
-                        ip_loopback:
-                            {
-                                "activate": True,
-                                "next-hop-self": True
-                            }
+                        "activate": True,
+                        "next-hop-self": True
                     }
-                self.enriched_json[current_router]["bgp"]["afis"]["vpnv4_unicast"]["neighbors"] = \
+
+                self.enriched_json[current_router]["bgp"]["afis"]["vpnv4_unicast"]["neighbors"][ip_loopback] = \
                     {
-                        ip_loopback:
-                            {
-                                "activate": True,
-                                "send-community": "extended"
-                            }
+                        "activate": True,
+                        "send-community": "extended"
                     }
+
                 self.enriched_json[current_router]["bgp"]["neighbors"][ip_loopback] = \
                     {
                         "remote-as": str(self.simplified_json["asn_core"]),
